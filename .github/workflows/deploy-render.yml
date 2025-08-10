@@ -1,0 +1,30 @@
+name: Deploy to Render (Blueprint)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trigger Render Blueprint Deploy
+        run: |
+          curl -s -X POST https://api.render.com/v1/blueprints/blueprint-deploys \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d @- <<'JSON'
+          {
+            "repo": "https://github.com/gitjiggy/clasio",
+            "branch": "main",
+            "clearCache": true,
+            "envVars": [
+              { "key": "DATABASE_URL", "value": "${{ secrets.DATABASE_URL }}" },
+              { "key": "FRONTEND_URL", "value": "${{ secrets.FRONTEND_URL }}" },
+              { "key": "ENCRYPTION_MASTER_KEY", "value": "${{ secrets.ENCRYPTION_MASTER_KEY }}" },
+              { "key": "POLYGON_API_KEY", "value": "${{ secrets.POLYGON_API_KEY }}" }
+            ]
+          }
+          JSON
