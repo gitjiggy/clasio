@@ -8,14 +8,13 @@
     "test": "echo 'backend tests run at root'",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "postinstall": "prisma generate --schema prisma/schema.postgres.prisma"
   },
   "dependencies": {
     "@prisma/client": "^5.16.2",
+    "prisma": "^5.16.2",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "prisma": "^5.16.2"
   }
 }
