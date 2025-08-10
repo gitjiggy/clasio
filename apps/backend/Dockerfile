@@ -1,8 +1,10 @@
 FROM node:20-bookworm-slim
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev || npm install --omit=dev
+# Copy manifest and install deps (no lockfile in apps/backend context)
+COPY package.json ./
+RUN npm install --omit=dev
+# Copy application source
 COPY . .
 EXPOSE 4000
 CMD ["node", "server.js"]
