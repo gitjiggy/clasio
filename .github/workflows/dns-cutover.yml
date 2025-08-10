@@ -6,38 +6,23 @@ jobs:
   update-dns:
     runs-on: ubuntu-latest
     steps:
-      - name: Set apex A to Vercel
+      - name: A @ -> Vercel
         env:
           GODADDY_API_KEY: ${{ secrets.GODADDY_API_KEY }}
           GODADDY_API_SECRET: ${{ secrets.GODADDY_API_SECRET }}
-        run: |
-          curl -sS -X PUT "https://api.godaddy.com/v1/domains/clasio.ai/records/A/@"
-          -H "Authorization: sso-key ${GODADDY_API_KEY}:${GODADDY_API_SECRET}"
-          -H "Content-Type: application/json"
-          -d '[{"data":"76.76.21.21","ttl":600}]'
-      - name: Set CNAME www -> Vercel
+        run: curl -sS -X PUT "https://api.godaddy.com/v1/domains/clasio.ai/records/A/%40" -H "Authorization: sso-key ${GODADDY_API_KEY}:${GODADDY_API_SECRET}" -H "Content-Type: application/json" -d '[{"data":"76.76.21.21","ttl":600}]'
+      - name: CNAME www -> Vercel
         env:
           GODADDY_API_KEY: ${{ secrets.GODADDY_API_KEY }}
           GODADDY_API_SECRET: ${{ secrets.GODADDY_API_SECRET }}
-        run: |
-          curl -sS -X PUT "https://api.godaddy.com/v1/domains/clasio.ai/records/CNAME/www"
-          -H "Authorization: sso-key ${GODADDY_API_KEY}:${GODADDY_API_SECRET}"
-          -H "Content-Type: application/json"
-          -d '[{"data":"cname.vercel-dns.com","ttl":600}]'
-      - name: Set CNAME api -> Render backend
-             env:
-          GODADDY_API_KEY: ${{ secrets.GODADDY_API_KEY }}
-          GODADDY_API_SECRET: ${{ secrets.GODADDY_API_SECRET }}
-        run: |
-          curl -sS -X PUT "https://api.godaddy.com/v1/domains/clasio.ai/records/CNAME/api"
-          -H "Authorization: sso-key ${GODADDY_API_KEY}:${GODADDY_API_SECRET}"
-          -H "Content-Type: application/json"
-          -d '[{"data":"clasio-backend.onrender.com","ttl":600}]'
-      - name: Show resulting records
+        run: curl -sS -X PUT "https://api.godaddy.com/v1/domains/clasio.ai/records/CNAME/www" -H "Authorization: sso-key ${GODADDY_API_KEY}:${GODADDY_API_SECRET}" -H "Content-Type: application/json" -d '[{"data":"cname.vercel-dns.com","ttl":600}]'
+      - name: CNAME api -> Render
         env:
           GODADDY_API_KEY: ${{ secrets.GODADDY_API_KEY }}
           GODADDY_API_SECRET: ${{ secrets.GODADDY_API_SECRET }}
-        run: |
-          curl -sS "https://api.godaddy.com/v1/domains/clasio.ai/records"
-          -H "Authorization: sso-key ${GODADDY_API_KEY}:${GODADDY_API_SECRET}"
-          
+        run: curl -sS -X PUT "https://api.godaddy.com/v1/domains/clasio.ai/records/CNAME/api" -H "Authorization: sso-key ${GODADDY_API_KEY}:${GODADDY_API_SECRET}" -H "Content-Type: application/json" -d '[{"data":"clasio-backend.onrender.com","ttl":600}]'
+      - name: Show records
+        env:
+        GODADDY_API_KEY: ${{ secrets.GODADDY_API_KEY }}
+          GODADDY_API_SECRET: ${{ secrets.GODADDY_API_SECRET }}
+        run: curl -sS "https://api.godaddy.com/v1/domains/clasio.ai/records" -H "Authorization: sso-key ${GODADDY_API_KEY}:${GODADDY_API_SECRET}"
