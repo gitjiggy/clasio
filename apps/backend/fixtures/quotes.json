@@ -1,0 +1,4 @@
+{
+  "AAPL": { "symbol": "AAPL", "price": 190.12, "volume": 1000000, "provider": "mock" },
+  "MSFT": { "symbol": "MSFT", "price": 410.55, "volume": 950000, "provider": "mock" }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@insti/backend",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "DATABASE_URL=\"file:./apps/backend/prisma/dev.db\" node server.js",
+    "start": "node server.js",
+    "test": "echo 'backend tests run at root'",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.16.2",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "prisma": "^5.16.2"
+  }
+}

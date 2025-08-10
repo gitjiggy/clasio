@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  hashed_password String
+  twofa_secret    String?
+  role            String   @default("user")
+  created_at      DateTime @default(now())
+  oauth_accounts  oauth_accounts[]
+  portfolios      portfolios[]
+  audit_log       audit_log[] @relation("user_audit")
+  watchlists      watchlists[]
+  alerts          alerts[]
+}
+
+model oauth_accounts {
+  id               String   @id @default(uuid())
+  user_id          String
+  provider         String
+  scope            String?
+  access_token_enc String?
+  refresh_token_enc String?
+  expires_at       DateTime?
+  consent_at       DateTime?
+  user             users    @relation(fields: [user_id], references: [id])
+}
+
+model portfolios {
+  id         String     @id @default(uuid())
+  user_id    String
+  name       String
+  is_default Boolean    @default(false)
+  user       users      @relation(fields: [user_id], references: [id])
+  holdings   holdings[]
+  transactions transactions[]
+}
+
+model holdings {
+  id           String   @id @default(uuid())
+  portfolio_id String
+  symbol       String
+  qty          Decimal
+  avg_cost     Decimal?
+  source       String?
+  asof_date    DateTime @default(now())
+  portfolio    portfolios @relation(fields: [portfolio_id], references: [id])
+}
+
+model transactions {
+  id           String   @id @default(uuid())
+  portfolio_id String
+  symbol       String
+  side         String
+  qty          Decimal
+  price        Decimal
+  fees         Decimal?
+  timestamp    DateTime @default(now())
+  source_id    String?
+  portfolio    portfolios @relation(fields: [portfolio_id], references: [id])
+}
+
+model prices {
+  symbol  String
+  date    DateTime
+  close   Decimal
+  open    Decimal?
+  high    Decimal?
+  low     Decimal?
+  volume  Int?
+  provider String?
+  ts       DateTime @default(now())
+  @@id([symbol, date])
+}
+
+model benchmarks {
+  id     String  @id @default(uuid())
+  symbol String  @unique
+  name   String
+}
+
+model watchlists {
+  id      String @id @default(uuid())
+  user_id String
+  name    String
+  user    users  @relation(fields: [user_id], references: [id])
+  items   watchlist_items[]
+}
+
+model watchlist_items {
+  id           String @id @default(uuid())
+  watchlist_id String
+  symbol       String
+  watchlist    watchlists @relation(fields: [watchlist_id], references: [id])
+}
+
+model alerts {
+  id       String  @id @default(uuid())
+  user_id  String
+  rule_json String
+  active   Boolean @default(true)
+  user     users   @relation(fields: [user_id], references: [id])
+}
+
+model audit_log {
+  id        String   @id @default(uuid())
+  user_id   String?
+  action    String
+  entity    String?
+  entity_id String?
+  meta_json String?
+  ts        DateTime @default(now())
+  prev_hash String?
+  hash      String
+  user      users?   @relation("user_audit", fields: [user_id], references: [id])
+}
+
+model feature_flags {
+  key        String  @id
+  value_json String
+}
+
+model content_blocks {
+  key        String @id
+  markdown   String
+  updated_at DateTime @default(now())
+}

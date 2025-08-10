@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: clasio-backend
+    env: docker
+    rootDir: apps/backend
+    dockerCommand: sh -c "npx prisma generate --schema prisma/schema.postgres.prisma && npx prisma db push --schema prisma/schema.postgres.prisma && node server.js"
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromSecret: DATABASE_URL
+      - key: FRONTEND_URL
+        fromSecret: FRONTEND_URL
+      - key: PORT
+        value: 4000
+      - key: ENCRYPTION_MASTER_KEY
+        fromSecret: ENCRYPTION_MASTER_KEY
+      - key: POLYGON_API_KEY
+        fromSecret: POLYGON_API_KEY
+
+databases:
+  - name: clasio-postgres
+    databaseName: insti
+    plan: free

@@ -1,0 +1,55 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: insti
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+
+  backend:
+    build: ./apps/backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/insti?schema=public
+      NEXT_PUBLIC_BACKEND_URL: http://backend:4000
+      FRONTEND_URL: http://localhost:3000
+      PORT: 4000
+      ENCRYPTION_MASTER_KEY: dev-only-32-bytes-key-dev-only-32
+    command: sh -c "npx prisma generate --schema prisma/schema.postgres.prisma && npx prisma db push --schema prisma/schema.postgres.prisma && node server.js"
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  frontend:
+    build: ./apps/frontend
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:4000
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: dev-nextauth-secret
+    command: sh -c "npm run dev"
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

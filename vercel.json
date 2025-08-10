@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "apps/frontend/package.json", "use": "@vercel/next" }
+  ],
+  "env": {
+    "NEXT_PUBLIC_BACKEND_URL": "https://api.clasio.ai",
+    "NEXTAUTH_URL": "https://www.clasio.ai"
+  }
+}

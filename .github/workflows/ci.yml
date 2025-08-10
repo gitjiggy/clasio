@@ -1,0 +1,42 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm install
+      - name: Start docker services
+        run: docker compose up -d
+      - name: Wait for backend
+        run: |
+          for i in {1..60}; do
+            if curl -sSf http://localhost:4000/health > /dev/null; then echo ok; exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - name: Unit/Integration Tests
+        run: |
+          export DATABASE_URL="file:./apps/backend/prisma/dev.db"
+          npm test
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: E2E Tests
+        run: npx playwright test
+      - name: Lighthouse CI
+        run: |
+          npm i -g @lhci/cli || true
+          lhci autorun --rc-file=lighthouserc.json || (echo "LHCI failed thresholds" && exit 1)
+      - name: OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:4000'
+          fail_action: true
+          rules_file_name: ''

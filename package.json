@@ -1,0 +1,22 @@
+{
+  "name": "insti-portfolio-analyzer",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm -ws run build",
+    "dev": "concurrently \"npm --workspace @insti/backend run dev\" \"npm --workspace @insti/frontend run dev\"",
+    "backend:dev": "npm --workspace @insti/backend run dev",
+    "frontend:dev": "npm --workspace @insti/frontend run dev",
+    "test": "node --test tests/*.test.js",
+    "lint": "echo 'lint skipped'"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}
