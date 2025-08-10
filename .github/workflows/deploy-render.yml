@@ -10,21 +10,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Parse CLASIO_SECRETS
+        id: parse
+        run: |
+          cat > .secrets <<'EOF'
+          ${{ secrets.CLASIO_SECRETS }}
+          EOF
+          # Export KEY=VALUE lines into env and mask values
+          while IFS='=' read -r k v; do
+            [ -z "$k" ] && continue
+            echo "::add-mask::$v"
+            echo "$k=$v" >> $GITHUB_ENV
+          done < .secrets
+
       - name: Trigger Render Blueprint Deploy
         run: |
           curl -s -X POST https://api.render.com/v1/blueprints/blueprint-deploys \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json" \
-            -d @- <<'JSON'
+            -d @- <<JSON
           {
             "repo": "https://github.com/gitjiggy/clasio",
             "branch": "main",
             "clearCache": true,
             "envVars": [
-              { "key": "DATABASE_URL", "value": "${{ secrets.DATABASE_URL }}" },
-              { "key": "FRONTEND_URL", "value": "${{ secrets.FRONTEND_URL }}" },
-              { "key": "ENCRYPTION_MASTER_KEY", "value": "${{ secrets.ENCRYPTION_MASTER_KEY }}" },
-              { "key": "POLYGON_API_KEY", "value": "${{ secrets.POLYGON_API_KEY }}" }
+              { "key": "DATABASE_URL", "value": "${DATABASE_URL}" },
+              { "key": "FRONTEND_URL", "value": "${FRONTEND_URL}" },
+              { "key": "ENCRYPTION_MASTER_KEY", "value": "${ENCRYPTION_MASTER_KEY}" },
+              { "key": "POLYGON_API_KEY", "value": "${POLYGON_API_KEY}" }
             ]
           }
           JSON
